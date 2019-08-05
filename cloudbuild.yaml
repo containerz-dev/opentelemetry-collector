@@ -1,0 +1,18 @@
+steps:
+  - name: docker.io/docker:19.03
+    entrypoint: 'sh'
+    args:
+    - '-c'
+    - |
+      docker container run -i --privileged -v=/workspace:/workspace --entrypoint=buildctl-daemonless.sh docker.io/moby/buildkit:master \
+        build \
+        --frontend=dockerfile.v0 \
+        --opt=build-arg:GOLANG_VERSION=1.12 --opt=build-arg:ALPINE_VERSION=3.10 --opt=target=otelsvc --opt=filename=Dockerfile \
+        --local=context=/workspace --local=dockerfile=/workspace \
+        --output=type=docker,name=gcr.io/$PROJECT_ID/opentelemetry/otelsvc:latest \
+        | docker image load
+
+images:
+  - gcr.io/$PROJECT_ID/opentelemetry/otelsvc:latest
+
+timeout: 1800s
