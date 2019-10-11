@@ -1,4 +1,4 @@
-# syntax = docker.io/docker/dockerfile-upstream:master-experimental
+# syntax = docker.io/docker/dockerfile:1.1.3-experimental
 
 # target: otelcol-builder
 ARG GOLANG_VERSION
@@ -18,6 +18,7 @@ RUN set -eux && \
 	GO111MODULE=off go get -u -d -v github.com/open-telemetry/opentelemetry-collector || true
 WORKDIR ${GOPATH}/src/github.com/open-telemetry/opentelemetry-collector
 RUN set -eux && \
+	# hack for lock to k8s.io/client-go@v12.0.0
 	go mod edit -replace 'k8s.io/client-go=k8s.io/client-go@78d2af792babf2dd937ba2e2a8d99c753a5eda89' && \
 	go mod tidy -v && \
 	CGO_ENABLED=0 GOBIN=${OUTDIR}/usr/bin/ go install -a -v -x -tags='osusergo,netgo,static,static_build' -installsuffix='netgo' -ldflags='-d -s -w "-extldflags=-fno-PIC -static"' \
@@ -34,21 +35,40 @@ COPY --from=nonroot /etc/group /etc/group
 COPY --from=otelcol-builder --chown=nonroot:nonroot /out/ /
 USER nonroot:nonroot
 
-# 55678: OpenCensus
+# 55678: OpenCensus receiver
 EXPOSE 55678
-# 55679: zPagez
+
+# 55679: zPagez extension
 EXPOSE 55679
-# 14250: Jaeger GRPCPort
-EXPOSE 14250
-# 14267: TChannel
-EXPOSE 14267
-# 14268: CollectorHTTPPort
-EXPOSE 14268
+
+# 14250: Jaeger gRPC
+# EXPOSE 14250
+
+# 14267: Jaeger thrift TChannel receiver
+# EXPOSE 14267
+
+# 14268: Jaeger thrift HTTPPort receiver
+# EXPOSE 14268
+
 #	5775: ZipkinThriftUDPPort
-EXPOSE 5775/udp
+# EXPOSE 5775/udp
+
 # 6831: CompactThriftUDPPort
-EXPOSE 6831/udp
+# EXPOSE 6831/udp
+
 # 6832: BinaryThriftUDPPort
-EXPOSE 6832/udp
+# EXPOSE 6832/udp
+
+# 1777: pprof extension
+# EXPOSE 1777/tcp
+ 
+# 8889: prometheus metrics
+# EXPOSE 8886/tcp
+ 
+# 8889: prometheus exporter metrics
+# EXPOSE 8889/tcp
+
+# 13133: health check extension
+# EXPOSE 13133/tcp
 
 ENTRYPOINT ["/usr/bin/otelcol"]
