@@ -21,7 +21,7 @@ RUN set -eux && \
 	# hack for lock to k8s.io/client-go@v12.0.0
 	go mod edit -replace 'k8s.io/client-go=k8s.io/client-go@78d2af792babf2dd937ba2e2a8d99c753a5eda89' && \
 	go mod tidy -v && \
-	CGO_ENABLED=0 GOBIN=${OUTDIR}/usr/bin/ go install -a -v -x -tags='osusergo,netgo,static,static_build' -installsuffix='netgo' -ldflags='-d -s -w "-extldflags=-fno-PIC -static"' \
+	CGO_ENABLED=0 GOBIN=${OUTDIR}/usr/bin/ go install -a -v -tags='osusergo,netgo,static,static_build' -installsuffix='netgo' -ldflags='-d -s -w "-extldflags=-fno-PIC -static"' \
 		github.com/open-telemetry/opentelemetry-collector/cmd/otelcol
 
 # target: nonroot
