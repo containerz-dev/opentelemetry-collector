@@ -10,10 +10,10 @@ steps:
         --opt=build-arg:GOLANG_VERSION=1.13 --opt=build-arg:ALPINE_VERSION=3.10 \
         --opt=target=otelcol --opt=filename=Dockerfile \
         --local=context=/workspace --local=dockerfile=/workspace \
-        --output=type=docker,name=gcr.io/$PROJECT_ID/opentelemetry-collector/otelsvc:latest \
+        --output=type=docker,name=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:latest \
         | docker image load
 
 images:
-  - gcr.io/$PROJECT_ID/opentelemetry-collector/otelsvc:latest
+  - gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:latest
 
 timeout: 1800s
