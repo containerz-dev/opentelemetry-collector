@@ -1,4 +1,4 @@
-# syntax = docker.io/docker/dockerfile:1.1.3-experimental
+# syntax = docker.io/docker/dockerfile:1.1.5-experimental
 
 # target: otelcol-builder
 ARG GOLANG_VERSION
