@@ -3,14 +3,14 @@ version: 2.1
 jobs:
   cloudbuild:
     docker:
-      - image: gcr.io/cloud-builders/gcloud-slim:latest
+      - image: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
     working_directory: /src/github.com/containerz-dev/opentelemetry-collector
     steps:
       - checkout
       - run:
           name: Setup Google Cloud SDK authentication
           command: |
-            echo -n ${CLOUDBUILD_GOOGLE_APPLICATION_CREDENTIALS_JSON} | base64 --decode | gcloud auth activate-service-account --key-file=-
+            echo -n ${CLOUDBUILD_GOOGLE_APPLICATION_CREDENTIALS_JSON} | base64 -d | gcloud auth activate-service-account --key-file=-
       - run:
           name: Build container image on Google Cloud Builder
           command: |
@@ -21,6 +21,10 @@ jobs:
 
 workflows:
   version: 2
+  build:
+    jobs:
+      - cloudbuild:
+          context: cloudbuild
   update-opentelemetry-collector:
     jobs:
       - cloudbuild:
