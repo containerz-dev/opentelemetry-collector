@@ -1,38 +1,53 @@
 version: 2.1
 
+orbs:
+  gcp-cli: circleci/gcp-cli@1.8.4  # https://circleci.com/orbs/registry/orb/circleci/gcp-cli
+
+commands:
+  cloudbuild:
+    parameters:
+      config_path:
+        description: "Cloud Build yaml config path"
+        type: string
+        default: "cloudbuild.yaml"
+    steps:
+      - gcp-cli/initialize:
+          gcloud-service-key: CLOUDBUILD_GOOGLE_APPLICATION_CREDENTIALS_JSON
+          google-project-id: PROJECT_ID
+      - run:
+          name: "Build container image with Google Cloud Builder"
+          command: |
+            gcloud builds submit . \
+              --project=${PROJECT_ID} \
+              --config="<< parameters.config_path >>" \
+              --gcs-log-dir="gs://${PROJECT_ID}_cloudbuild/log"
+
 jobs:
   cloudbuild:
     docker:
       - image: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
     working_directory: /src/github.com/containerz-dev/opentelemetry-collector
+    parameters:
+      config_path:
+        description: "Cloud Build yaml config path"
+        type: string
+        default: "cloudbuild.yaml"
     steps:
       - checkout
-      - run:
-          name: Setup Google Cloud SDK authentication
-          command: |
-            echo -n ${CLOUDBUILD_GOOGLE_APPLICATION_CREDENTIALS_JSON} | base64 -d | gcloud auth activate-service-account --key-file=-
-      - run:
-          name: Build container image on Google Cloud Builder
-          command: |
-            gcloud builds submit . \
-              --project=${GCP_PROJECT} \
-              --config=cloudbuild.yaml \
-              --gcs-log-dir="gs://${GCP_PROJECT}_cloudbuild/log"
+      - cloudbuild:
+          config_path: "<< parameters.config_path >>"
 
 workflows:
   version: 2
-  build:
+  update-opentelemetry-collector:
     jobs:
       - cloudbuild:
+          config_path: "cloudbuild.master.yaml"
           context: cloudbuild
-  # update-opentelemetry-collector:
-  #   jobs:
-  #     - cloudbuild:
-  #         context: cloudbuild
-  #   triggers:
-  #     - schedule:
-  #         cron: "0 0 * * *"  # 00:00/day
-  #         filters:
-  #           branches:
-  #             only:
-  #               - master
+    triggers:
+      - schedule:
+          cron: "0 22 * * *"  # Run at 07:00 AM (JST) every day
+          filters:
+            branches:
+              only:
+                - master
