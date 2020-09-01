@@ -16,4 +16,6 @@ steps:
 images:
   - gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:latest
 
+tags: ['opentelemetry-collector']
+
 timeout: 1800s
