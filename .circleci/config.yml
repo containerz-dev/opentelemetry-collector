@@ -25,14 +25,14 @@ workflows:
     jobs:
       - cloudbuild:
           context: cloudbuild
-  update-opentelemetry-collector:
-    jobs:
-      - cloudbuild:
-          context: cloudbuild
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"  # 00:00/day
-          filters:
-            branches:
-              only:
-                - master
+  # update-opentelemetry-collector:
+  #   jobs:
+  #     - cloudbuild:
+  #         context: cloudbuild
+  #   triggers:
+  #     - schedule:
+  #         cron: "0 0 * * *"  # 00:00/day
+  #         filters:
+  #           branches:
+  #             only:
+  #               - master
