@@ -1,9 +1,8 @@
 steps:
-  - id: latest
+  - id: master
     name: gcr.io/kaniko-project/executor:latest
     args:
-      - --destination=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:${_OTELCOL_VERSION}
-      - --destination=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:latest
+      - --destination=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:master
       - --cache=true
       - --cache-ttl=6h
       - --cache-repo=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol/cache
@@ -14,13 +13,12 @@ steps:
       - --target=otelcol
       - --build-arg=GOLANG_VERSION=${_GOLANG_VERSION}
       - --build-arg=ALPINE_VERSION=${_ALPINE_VERSION}
-      - --build-arg=OTELCOL_VERSION=${_OTELCOL_VERSION}
+      - --build-arg=OTELCOL_VERSION=master
 
-  - id: latest-debug
+  - id: master-debug
     name: gcr.io/kaniko-project/executor:latest
     args:
-      - --destination=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:${_OTELCOL_VERSION}-debug
-      - --destination=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:latest-debug
+      - --destination=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:master-debug
       - --cache=true
       - --cache-ttl=6h
       - --cache-repo=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol/cache
@@ -31,14 +29,13 @@ steps:
       - --target=otelcol-debug
       - --build-arg=GOLANG_VERSION=${_GOLANG_VERSION}
       - --build-arg=ALPINE_VERSION=${_ALPINE_VERSION}
-      - --build-arg=OTELCOL_VERSION=${_OTELCOL_VERSION}
+      - --build-arg=OTELCOL_VERSION=master
 
 substitutions:
   _GOLANG_VERSION: "1.15"
   _ALPINE_VERSION: "3.12"
-  _OTELCOL_VERSION: "v0.9.0"
 
-tags: ['opentelemetry-collector']
+tags: ['opentelemetry-collector.master']
 
 options:
   machineType: "N1_HIGHCPU_32"
