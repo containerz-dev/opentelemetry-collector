@@ -16,11 +16,11 @@ steps:
       - --build-arg=ALPINE_VERSION=${_ALPINE_VERSION}
       - --build-arg=OTELCOL_VERSION=${_OTELCOL_VERSION}
 
-  - id: latest-debug
+  - id: debug
     name: gcr.io/kaniko-project/executor:latest
     args:
       - --destination=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:${_OTELCOL_VERSION}-debug
-      - --destination=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:latest-debug
+      - --destination=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol:debug
       - --cache=true
       - --cache-ttl=6h
       - --cache-repo=gcr.io/$PROJECT_ID/opentelemetry-collector/otelcol/cache
