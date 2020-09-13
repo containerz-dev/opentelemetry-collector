@@ -7,31 +7,34 @@ FROM docker.io/golang:${GOLANG_VERSION}-alpine${ALPINE_VERSION} AS otelcol-build
 ENV OUTDIR=/out
 
 RUN set -eux && \
-        apk add --no-cache \
-            ca-certificates \
-            git \
-            make \
-        && \
-        mkdir -p "${OUTDIR}/usr/local/bin"
+	apk add --no-cache \
+		ca-certificates \
+		git \
+		make \
+	&& \
+	mkdir -p "${OUTDIR}/usr/local/bin"
 
 ARG OTELCOL_VERSION
 ENV OTELCOL_VERSION=${OTELCOL_VERSION:-latest}
 
 RUN set -eux && \
-        if [ ${OTELCOL_VERSION} = 'latest' ]; then OTELCOL_VERSION=$(wget -O - -q https://api.github.com/repos/open-telemetry/opentelemetry-collector/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|'); fi && \
-        git clone --depth 1 --branch ${OTELCOL_VERSION} --single-branch \
-            https://github.com/open-telemetry/opentelemetry-collector.git ${GOPATH}/src/go.opentelemetry.io/collector
+	if [ "${OTELCOL_VERSION}" = 'latest' ]; then OTELCOL_VERSION=$(wget -O - -q https://api.github.com/repos/open-telemetry/opentelemetry-collector/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|'); fi && \
+	git clone --depth 1 --branch "${OTELCOL_VERSION}" --single-branch \
+		https://github.com/open-telemetry/opentelemetry-collector.git "${GOPATH}/src/go.opentelemetry.io/collector"
+
+RUN set -eux && \
+	go get -u -v github.com/mjibson/esc@latest
 
 WORKDIR ${GOPATH}/src/go.opentelemetry.io/collector
 
 RUN set -eux && \
-        sed -i 's|url = git@github.com:|url = https://github.com/|' .gitmodules && \
-        git submodule update --init --depth 1
+	sed -i 's|url = git@github.com:|url = https://github.com/|' .gitmodules && \
+	git submodule update --init --depth 1
 
 RUN set -eux && \
-        GOFLAGS='-v -tags=osusergo,netgo,static,static_build -trimpath -installsuffix=netgo' make otelcol GOOS=$(go env GOOS) GOARCH=$(go env GOARCH) BUILD_INFO="-ldflags='-X=go.opentelemetry.io/collector/internal/version.GitHash=$(git rev-parse --short HEAD) -X=go.opentelemetry.io/collector/internal/version.BuildType=release -d -s -w '-extldflags=-static''"
+	GOFLAGS='-v -tags=osusergo,netgo,static,static_build -trimpath -installsuffix=netgo' make otelcol GOOS="$(go env GOOS)" GOARCH="$(go env GOARCH)" BUILD_INFO="-ldflags='-X=go.opentelemetry.io/collector/internal/version.GitHash=$(git rev-parse --short HEAD) -X=go.opentelemetry.io/collector/internal/version.BuildType=release -d -s -w '-extldflags=-static''"
 
-RUN mv ./bin/otelcol_$(go env GOOS)_$(go env GOARCH) ${OUTDIR}/usr/local/bin/otelcol
+RUN mv ./bin/otelcol_"$(go env GOOS)"_"$(go env GOARCH)" ${OUTDIR}/usr/local/bin/otelcol
 
 # target: otelcol
 FROM gcr.io/distroless/static:nonroot AS otelcol
