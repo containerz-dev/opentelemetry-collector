@@ -4,7 +4,10 @@
 ARG GOLANG_VERSION
 ARG ALPINE_VERSION
 FROM docker.io/golang:${GOLANG_VERSION}-alpine${ALPINE_VERSION} AS otelcol-builder
-ENV OUTDIR=/out
+ENV \
+	OUTDIR=/out \
+	CGO_ENABLED=0 \
+	GO111MODULE=on
 
 RUN set -eux && \
 	apk add --no-cache \
