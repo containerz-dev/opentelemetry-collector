@@ -35,7 +35,7 @@ RUN set -eux && \
 	git submodule update --init --depth 1
 
 RUN set -eux && \
-	GOFLAGS='-v -tags=osusergo,netgo,static,static_build -trimpath -installsuffix=netgo' make otelcol GOOS="$(go env GOOS)" GOARCH="$(go env GOARCH)" BUILD_INFO="-ldflags='-X=go.opentelemetry.io/collector/internal/version.GitHash=$(git rev-parse --short HEAD) -X=go.opentelemetry.io/collector/internal/version.BuildType=release -d -s -w '-extldflags=-static''"
+	GOFLAGS='-v -tags=osusergo,netgo,static,static_build -installsuffix=netgo' make otelcol GOOS="$(go env GOOS)" GOARCH="$(go env GOARCH)" BUILD_INFO="-ldflags='-X=go.opentelemetry.io/collector/internal/version.GitHash=$(git rev-parse --short HEAD) -X=go.opentelemetry.io/collector/internal/version.BuildType=release -d -s -w '-extldflags=-static''"
 
 RUN mv ./bin/otelcol_"$(go env GOOS)"_"$(go env GOARCH)" ${OUTDIR}/usr/local/bin/otelcol
 
