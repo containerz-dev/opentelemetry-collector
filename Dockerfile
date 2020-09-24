@@ -26,7 +26,7 @@ RUN set -eux && \
 		https://github.com/open-telemetry/opentelemetry-collector.git "${GOPATH}/src/go.opentelemetry.io/collector"
 
 RUN set -eux && \
-	go get -u -v github.com/mjibson/esc@latest
+	go get -u -v github.com/mjibson/esc@latest github.com/google/addlicense@latest
 
 WORKDIR ${GOPATH}/src/go.opentelemetry.io/collector
 
