@@ -36,7 +36,7 @@ steps:
 substitutions:
   _GOLANG_VERSION: "1.15"
   _ALPINE_VERSION: "3.12"
-  _OTELCOL_VERSION: "v0.9.0"
+  _OTELCOL_VERSION: "latest"
 
 tags: ['opentelemetry-collector']
 
