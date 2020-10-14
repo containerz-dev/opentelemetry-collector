@@ -14,6 +14,7 @@ steps:
       - --build-arg=GOLANG_VERSION=${_GOLANG_VERSION}
       - --build-arg=ALPINE_VERSION=${_ALPINE_VERSION}
       - --build-arg=OTELCOL_VERSION=master
+      - --build-arg=OTELCONTRIBCOL_VERSION=master
 
   - id: master-debug
     name: gcr.io/kaniko-project/executor:latest
@@ -30,12 +31,13 @@ steps:
       - --build-arg=GOLANG_VERSION=${_GOLANG_VERSION}
       - --build-arg=ALPINE_VERSION=${_ALPINE_VERSION}
       - --build-arg=OTELCOL_VERSION=master
+      - --build-arg=OTELCONTRIBCOL_VERSION=master
 
 substitutions:
   _GOLANG_VERSION: "1.15"
   _ALPINE_VERSION: "3.12"
 
-tags: ['opentelemetry-collector.master']
+tags: ["opentelemetry-collector.master", "opentelemetry-collector-contrib.master"]
 
 options:
   machineType: "N1_HIGHCPU_32"

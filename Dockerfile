@@ -39,9 +39,42 @@ RUN set -eux && \
 
 RUN mv ./bin/otelcol_"$(go env GOOS)"_"$(go env GOARCH)" ${OUTDIR}/usr/local/bin/otelcol
 
+# target: otelcontribcol-builder
+ARG GOLANG_VERSION
+ARG ALPINE_VERSION
+FROM docker.io/golang:${GOLANG_VERSION}-alpine${ALPINE_VERSION} AS otelcontribcol-builder
+ENV \
+	OUTDIR=/out \
+	CGO_ENABLED=0 \
+	GO111MODULE=on
+
+RUN set -eux && \
+	apk add --no-cache \
+		ca-certificates \
+		git \
+		make \
+	&& \
+	mkdir -p "${OUTDIR}/usr/local/bin"
+
+ARG OTELCONTRIBCOL_VERSION
+ENV OTELCONTRIBCOL_VERSION=${OTELCONTRIBCOL_VERSION:-latest}
+
+RUN set -eux && \
+	if [ "${OTELCONTRIBCOL_VERSION}" = 'latest' ]; then OTELCOL_VERSION=$(wget -O - -q https://api.github.com/repos/open-telemetry/opentelemetry-collector-contrib/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|'); fi && \
+	git clone --depth 1 --branch "${OTELCOL_VERSION}" --single-branch \
+		https://github.com/open-telemetry/opentelemetry-collector-contrib.git "${GOPATH}/src/github.com/open-telemetry/opentelemetry-collector-contrib"
+
+WORKDIR ${GOPATH}/src/github.com/open-telemetry/opentelemetry-collector-contrib
+
+RUN set -eux && \
+	GOFLAGS='-v -tags=osusergo,netgo,static,static_build -installsuffix=netgo' make otelcontribcol GOOS="$(go env GOOS)" GOARCH="$(go env GOARCH)" BUILD_INFO="-ldflags='-X github.com/open-telemetry/opentelemetry-collector-contrib/internal/version.GitHash=$(git rev-parse --short HEAD) -X go.opentelemetry.io/collector/internal/version.BuildType=release -d -s -w '-extldflags=-static''"
+
+RUN mv ./bin/otelcontribcol_"$(go env GOOS)"_"$(go env GOARCH)" ${OUTDIR}/usr/local/bin/otelcontribcol
+
 # target: otelcol
 FROM gcr.io/distroless/static:nonroot AS otelcol
 COPY --from=otelcol-builder --chown=nonroot:nonroot /out/ /
+COPY --from=otelcontribcol-builder --chown=nonroot:nonroot /out/ /
 USER nonroot:nonroot
 #     55678: OpenCensus receiver
 #     55679: zPagez extension
@@ -62,6 +95,7 @@ ENTRYPOINT ["otelcol"]
 # target: otelcol-debug
 FROM gcr.io/distroless/base:debug-nonroot AS otelcol-debug
 COPY --from=otelcol-builder --chown=nonroot:nonroot /out/ /
+COPY --from=otelcontribcol-builder --chown=nonroot:nonroot /out/ /
 USER nonroot:nonroot
 #     55678: OpenCensus receiver
 #     55679: zPagez extension
