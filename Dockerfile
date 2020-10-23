@@ -60,8 +60,8 @@ ARG OTELCONTRIBCOL_VERSION
 ENV OTELCONTRIBCOL_VERSION=${OTELCONTRIBCOL_VERSION:-latest}
 
 RUN set -eux && \
-	if [ "${OTELCONTRIBCOL_VERSION}" = 'latest' ]; then OTELCOL_VERSION=$(wget -O - -q https://api.github.com/repos/open-telemetry/opentelemetry-collector-contrib/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|'); fi && \
-	git clone --depth 1 --branch "${OTELCOL_VERSION}" --single-branch \
+	if [ "${OTELCONTRIBCOL_VERSION}" = 'latest' ]; then OTELCONTRIBCOL_VERSION=$(wget -O - -q https://api.github.com/repos/open-telemetry/opentelemetry-collector-contrib/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|'); fi && \
+	git clone --depth 1 --branch "${OTELCONTRIBCOL_VERSION}" --single-branch \
 		https://github.com/open-telemetry/opentelemetry-collector-contrib.git "${GOPATH}/src/github.com/open-telemetry/opentelemetry-collector-contrib"
 
 WORKDIR ${GOPATH}/src/github.com/open-telemetry/opentelemetry-collector-contrib
