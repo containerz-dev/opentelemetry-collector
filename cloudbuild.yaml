@@ -43,7 +43,4 @@ substitutions:
 
 tags: ["opentelemetry-collector", "opentelemetry-collector-contrib"]
 
-options:
-  machineType: "N1_HIGHCPU_32"
-
 timeout: 900s  # 15min
